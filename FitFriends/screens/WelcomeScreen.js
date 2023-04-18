@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { StyleSheet, 
+import { 
+  StyleSheet, 
   View, 
   ScrollView, 
   Text, 
@@ -185,10 +186,12 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   logInFormContainer: {
-    flex: 2,
+    flex: 1,
     width: '90%',
+    justifyContent: 'center',
   },
   forgotPasswordContainer: {
     alignItems: 'center',
@@ -271,7 +274,7 @@ function SignUp({ navigation }) {
   const [birthDate, setBirthDate] = React.useState(new Date());
   const [error, setError] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const { authToken, setAuthToken } = React.useContext(AuthContext);
+  const { setAuthToken } = React.useContext(AuthContext);
 
   const [hidden, setHidden] = React.useState(true);
 
@@ -292,9 +295,6 @@ function SignUp({ navigation }) {
 
     const {data} = await axios.post('http://localhost:3000/signup', userToSignUp);
     console.log('data:', data.token);
-    if (!setAuthToken) {
-      console.log('shit');
-    }
     setAuthToken(data.token);
   }
 
@@ -468,20 +468,41 @@ function SignUp({ navigation }) {
 function LogIn({ navigation }) {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
-
+  const [error, setError] = React.useState(undefined);
   const [hidden, setHidden] = React.useState(true);
+  const { setAuthToken } = React.useContext(AuthContext);
+
+  async function handleLogIn() {
+    userToLogIn = {
+      inputEmail: email,
+      inputPassword: password
+    }
+    try {
+      const {data} = await axios.post('http://localhost:3000/login', userToLogIn);
+      console.log('data:', data);
+      setAuthToken(data.token);
+    } catch (e) {
+      // console.log(e.response)
+      setError(true);
+    }
+
+  }
 
   return (
     <TouchableWithoutFeedback onPress={() => {Keyboard.dismiss()}}>
-    <View style={styles.logInPageContainer}>
-        <View style={styles.topTextContainer}>
-          <Text style={styles.topText}>Gain access to following topics, saving stories, commenting, and tracking progress in puzzles.</Text>
-        </View>
+      <View style={styles.logInPageContainer}>
         <KeyboardAvoidingView
           style={styles.logInFormContainer}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={50}
         >
+          {error &&
+            <View style={{display: 'flex', alignItems: 'center'}}>
+              <Text style={{color: 'red'}}>
+                The Email / Password combination does not work!
+              </Text>
+            </View>
+          }
+
           <View style={styles.formInputs}>
             <Text style={styles.text}
             >Email Address</Text>
@@ -518,11 +539,11 @@ function LogIn({ navigation }) {
           </View>
           <View stlye={styles.logInButtonContainer}>
             <Pressable style={({ pressed }) => [
-              { backgroundColor: pressed ? '#bf283f' : '#A32538' },
+              { backgroundColor: pressed ? '#3d85cc' : '#326DA8' },
               styles.logInButton
               ]}
               onPress={() => {
-                console.log('log in completed button pressed', email, password)
+                handleLogIn();
             }}>
               <Text style={styles.signUpButtonText}>Log In</Text>
             </Pressable>
@@ -610,49 +631,16 @@ function ForgotPassword({ navigation }) {
   )
 }
 
-function Home({ navigation }) {
-  return (
-    <View>
-      <Text>Home Screen</Text>
-    </View>
-  );
-}
-
 const Stack = createNativeStackNavigator();
 
 export function WelcomeScreen( {navigation} ) {
-  // const [isLoading, setIsLoading] = React.useState(true);
-  const { authToken, hasAuthToken } = React.useContext(AuthContext);
 
   return (
     <AuthProvider>
-      <Stack.Navigator 
-        initialRouteName="Welcome" 
-        screenOptions= {{
-          headerStyle: { 
-            backgroundColor: '#EEEEEE'
-          }, 
-          headerTitleStyle: {
-            fontFamily: 'PTSerif_700Bold',
-            fontSize: 20
-          },
-          headerTintColor: 'black',
-          headerShadowVisible: false
-        }}
-      >
-        {authToken !== undefined ? (
-        <>
-        <Stack.Screen name="Home" component={Home} options={{ title: 'Fit Friends' }} />
-        </>
-        ) : (
-        <>
-          <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }}/>
-          <Stack.Screen name="SignUp" component={SignUp} options={{ title: 'Create an Account' }}/>
-          <Stack.Screen name="LogIn" component={LogIn} options={{ title: 'Log In' }} />
-          <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{ title: 'Forgot Password' }} />
-        </>
-        )}
-      </Stack.Navigator>
+        <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }}/>
+        <Stack.Screen name="SignUp" component={SignUp} options={{ title: 'Create an Account' }}/>
+        <Stack.Screen name="LogIn" component={LogIn} options={{ title: 'Log In' }} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{ title: 'Forgot Password' }} />
     </AuthProvider>
   )
 }
