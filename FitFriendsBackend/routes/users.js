@@ -14,7 +14,6 @@ router.use(express.urlencoded({extended: true}));
 
 router.post('/signup', async (req, res) => {
   errors = []
-  console.log('here:', req.body);
 
   //verify username
   if (!req.body.inputUsername) {
@@ -101,5 +100,41 @@ router.post('/signup', async (req, res) => {
     }
   }
 });
+
+router.post('/login', async (req, res) => {
+  errors = []
+
+  //verify email
+  if (!req.body.inputEmail) {
+    errors.push({error: 'Email must be provided.'});
+  }
+  try {
+    validation.verifyEmail(req.body.inputEmail);
+  } catch (e) {
+    errors.push({error: 'Email must be valid.'});
+  }
+  //verify password
+  if (!req.body.inputPassword) {
+    errors.push({error: 'Password must be provided.'});
+  }
+  
+  //see if any errors
+  if (errors.length > 0) {
+    res.status(400).json({error: errors});
+  } else {
+    //no errors -> try and login user
+    try { 
+      let loggedInUser = await usersDB.checkUser(req.body.inputEmail, req.body.inputPassword);
+      if (loggedInUser) {
+        res.status(200).json({token: loggedInUser.userToken});
+      } else {
+        res.status(500).json({error: 'Something went wrong!'});
+      }
+    } catch (e) {
+      console.log(e);
+      res.status(401).json({error: 'Incorrect Email/Password combo!'});
+    }
+  }
+})
 
 module.exports = router;

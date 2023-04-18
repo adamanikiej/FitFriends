@@ -23,7 +23,7 @@ module.exports = {
     const userId = uuidv4();
 
     // create jwt for user
-    const userToken = jwt.sign({userId: userId}, process.env.JWT_SECRET_KEY);
+    const userToken = jwt.sign({userId: userId, username: username}, process.env.JWT_SECRET_KEY);
 
     //create new user object
     let newUser = {
@@ -31,6 +31,7 @@ module.exports = {
       userToken, userToken,
       username: username,
       email: email,
+      hashedPassword: hashedPassword,
       firstName: firstName,
       lastName: lastName,
       birthDate, birthDate,
@@ -44,5 +45,23 @@ module.exports = {
     if (!insertInfo.acknowledged || !insertInfo.insertedId) throw 'Insert user failed!';
     
     return newUser;
+  },
+  async checkUser(email, password) {
+    const userCollection = await user();
+
+    //see if user exists
+    const userFound = await userCollection.findOne({email: email});
+    if (userFound === null) throw 'No user found with this email!';
+    let compare = await bcrypt.compare(password, userFound.hashedPassword);
+    if (!compare) throw 'Incorrect Password';
+
+    return userFound;
+  },
+  async getUserFromToken(token) {
+    const userCollection = await user();
+
+    // see if user exists
+    const userFound = await userCollection.findOne({userToken: token});
+    if (userFound === null) throw 'No user found with this token!';
   }
 }
