@@ -1,5 +1,5 @@
 const mongoCollections = require('../config/mongoCollection');
-const workoutC = mongoCollections.workouts;
+const workoutLogC = mongoCollections.workoutLogs;
 const card = mongoCollections.cards;
 const user = mongoCollections.users;
 const jwt = require('jsonwebtoken');
@@ -8,7 +8,7 @@ require('dotenv').config();
 
 module.exports = {
   async createWorkout(userToken, workout) {
-    const workoutCollection = await workoutC();
+    const workoutLogCollection = await workoutLogC();
 
     const workoutId = uuidv4();
 
@@ -24,17 +24,18 @@ module.exports = {
       throw 'Invalid user token!';
     }
 
-    let newWorkout = {
+    let newWorkoutLog = {
       _id: workoutId,
       author: userId,
       workoutName: workout.workoutName,
+      workoutDate: workout.workoutDate,
       workoutLength: workout.workoutLength,
       workoutIntensity: workout.workoutIntensity,
       exercises: workout.exercises,
     }
 
     //insert new workout into workout collection
-    const insertInfo = await workoutCollection.insertOne(newWorkout);
+    const insertInfo = await workoutLogCollection.insertOne(newWorkoutLog);
     if (!insertInfo || !insertInfo.insertedId) throw 'Could not add new workout';
 
     //insert new workout into card collection
@@ -44,22 +45,24 @@ module.exports = {
     const newId = insertInfo.insertedId.toString();
     await module.exports.addWorkoutToUser(userId, newId);
 
-    return newWorkout;
+    return newWorkoutLog;
   },
   async addWorkoutCard(userId, username, workout) {
     const cardCollection = await card();
 
     const cardId = uuidv4();
 
+    const dateField = new Date(workout.workoutDate).toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'})
+    
     let newCard = {
       _id: cardId,
       date: new Date(),
-      text: 'has created a workout!',
+      text: `has logged a workout for ${dateField}!`,
       user: {
         _id: userId,
         username: username
       },
-      cardType: "workout",
+      cardType: "workoutLog",
       cardContent: workout,
       likes: 0,
       comments: []
@@ -79,18 +82,18 @@ module.exports = {
     if (userFound === null) throw 'No user found with this id';
 
     // add workoutId to list
-    userFound.userMadeWorkouts.push(workoutId);
+    userFound.userLoggedWorkouts.push(workoutId);
 
     // update user object
     const updatedInfo = await userCollection.updateOne(
       {_id: userId},
-      {$set: {userMadeWorkouts: userFound.userMadeWorkouts}}
+      {$set: {userLoggedWorkouts: userFound.userLoggedWorkouts}}
     );
-    if (updatedInfo.modifiedCount <= 0) throw 'Could not add workout to user!'
+    if (updatedInfo.modifiedCount <= 0) throw 'Could not add workout log to user!'
     return;
   },
   async getWorkouts(userToken) {
-    const workoutCollection = await workoutC();
+    const workoutLogCollection = await workoutLogC();
 
     let userId = null;
     try {
@@ -101,8 +104,8 @@ module.exports = {
       throw 'Invalid user token!';
     }
 
-    const workoutList = workoutCollection.find({author: userId}).toArray();
+    const workoutLogList = workoutLogCollection.find({author: userId}).toArray();
     
-    return workoutList;
+    return workoutLogList;
   }
 }
