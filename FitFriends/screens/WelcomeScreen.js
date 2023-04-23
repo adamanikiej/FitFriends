@@ -31,7 +31,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 36,
     fontFamily: 'AbrilFatface_400Regular',
-    textAlign: 'center'
+    textAlign: 'center',
+    color: '#326DA8'
   },
   subtitle: {
     fontSize: 18,
@@ -615,7 +616,7 @@ function ForgotPassword({ navigation }) {
           </View>
           <View style={styles.forgotPasswordSubmitButton}>
             <Pressable style={({ pressed }) => [
-              { backgroundColor: pressed ? '#bf283f' : '#A32538' },
+              { backgroundColor: pressed ? '#3d85cc' : '#326DA8' },
               styles.signUpButton
               ]}
               onPress={() => {

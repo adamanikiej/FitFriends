@@ -242,6 +242,9 @@ function ViewWorkouts({ route, navigation }, props) {
                       {backgroundColor: pressed ? '#3d85cc' : '#326DA8'},
                       {paddingVertical: 4, paddingHorizontal: 12, borderRadius: 6}
                     ]}
+                    onPress={() => {
+                      navigation.navigate('ViewWorkoutNavigator', {screen: 'ViewWorkout', tabBarVisible: true});
+                    }}
                   >
                     <Text style={{fontFamily: 'PTSerif_700Bold', fontSize: 14, color: 'white', textAlign: 'center'}}>View</Text>
                   </Pressable>
@@ -321,6 +324,38 @@ function ViewWorkouts({ route, navigation }, props) {
   )
 }
 
+const WorkoutStack = createNativeStackNavigator();
+
+export function ViewWorkoutNavigator({ navigation }) {
+  return (
+    <WorkoutStack.Navigator>
+      <WorkoutStack.Screen name="ViewWorkout" component={ViewWorkout} options={{headerShown: true, title: 'View Workout'}}/>
+    </WorkoutStack.Navigator>
+  )
+}
+
+function ViewWorkout({ navigation }) {
+
+  useFocusEffect(React.useCallback(() => {
+    const onBackPress = () => {
+      navigation.goBack(null);
+      return true;
+    }
+    const subscription = navigation.addListener('beforeRemove', (e) => {
+      e.preventDefault();
+      subscription();
+      onBackPress();
+    })
+    return () => subscription();
+  }, [navigation]))
+
+  return (
+    <View>
+      <Text>View workout</Text>
+    </View>
+  )
+}
+
 function CreateWorkout({ navigation }) {
   const [currentExercise, setCurrentExercise] = React.useState(null);
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -348,7 +383,7 @@ function CreateWorkout({ navigation }) {
     'Machine Peck Dec', 'Barbell Decline Bench Press', 'Dumbbell Decline Bench Press', 'Dumbbell Floor Press', 'Chest Dips', 
     'Farmer\'s Carry', 'Abductor Machine', 'Adductor Machine', 'Barbell Squat', 'Goblet Squat', 'Squat', 'Barbell Hip Thrusts', 
     'Bulgarian Split Squat', 'Barbell Snatch', 'Dumbbell Lunges', 'Dumbbell Romanian Deadlift', 'Machine Hamstring Curl', 
-    'Barbell Bent Over Rows', 'Dumbbell Bent Over Rows', 'T-Bar Rows', 'Cable Face Pulls', 'Dumbell Incline Bench Rows', 
+    'Barbell Bent Over Rows', 'Dumbbell Bent Over Rows', 'T-Bar Rows', 'Cable Face Pulls', 'Leg Extensions', 'Dumbell Incline Bench Rows', 
     'Reverse Chest Flyes', 'Cable X-Pulls', 'Cable Lateral Raises', 'Dumbbell Lateral Raises', 'Machine Shoulder Press', 
     'Dumbbell Shoulder Press', 'Dumbbell Arnold Press', 'Barbell Shoulder Press', 'Barbell Front Raise', 'Dumbbell Front Raise', 
     'Cable Tricep Pull Down', 'Machine Tricep Dips', 'Cable Overhead Tricep Extensions', 'Barbell Close-Grip Press', 'Diamond Push-ups', 'Lat Pull-Down']
@@ -669,9 +704,9 @@ function CreateLog({ navigation }) {
 
   const exerciseList = ['Ab Crunch Machine', 'Ab Roller', 'Bear Crawls', 'Flutter Kicks', ' Bicycles', 'Plank', 
     'Side Plank', 'Crunches', 'Dead Bug', 'Hanging Knee Raises', 'Barbell Bicep Curls', 'Barbell Drag Bicep Curl', 
-    'Preacher Curls', 'Standing Dumbbell Bicep Curls', 'Incline Dumbell Bicep Curls', 'Dumbbell Concentration Curls', 
+    'Preacher Curls', 'Standing Dumbbell Bicep Curls', 'Incline Dumbbell Bicep Curls', 'Dumbbell Concentration Curls', 
     'Dumbbell Hammer Curls', 'Reverse Dumbbell Bicep Curls', 'Calf Raises', 'Barbell Bench Press', 'Barbell Incline Bench Press', 
-    'Dumbbell Bench Press', 'Incline Dumbell Bench Press', 'Push-ups', 'Bench Cable Flyes', 'Machine Cable flyes', 
+    'Dumbbell Bench Press', 'Incline Dumbbell Bench Press', 'Push-ups', 'Bench Cable Flyes', 'Machine Cable flyes', 
     'Machine Peck Dec', 'Barbell Decline Bench Press', 'Dumbbell Decline Bench Press', 'Dumbbell Floor Press', 'Chest Dips', 
     'Farmer\'s Carry', 'Abductor Machine', 'Adductor Machine', 'Barbell Squat', 'Goblet Squat', 'Squat', 'Barbell Hip Thrusts', 
     'Bulgarian Split Squat', 'Barbell Snatch', 'Dumbbell Lunges', 'Dumbbell Romanian Deadlift', 'Machine Hamstring Curl', 

@@ -1,20 +1,20 @@
 import * as React from 'react';
 import { View, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { Home } from './Home';
 import { Search } from './Search';
-import { Workout } from './Workout';
+import { Workout, ViewWorkoutNavigator } from './Workout';
 import { Profile } from './Profile';
 
 const Tab = createBottomTabNavigator();
+const WorkoutStack = createNativeStackNavigator();
 
-
-
-export function Authenticated({ navigation }) {
+function BottomNavigationStack() {
   return (
     <Tab.Navigator
       screenOptions={{
@@ -47,6 +47,20 @@ export function Authenticated({ navigation }) {
         tabBarIcon: ({color, size }) => {
           return <EvilIcons name="user" size={50} color={color}/>
         }}}/>
-    </Tab.Navigator>
+      </Tab.Navigator>
+  )
+}
+
+export function Authenticated({ navigation }) {
+  return (
+    <WorkoutStack.Navigator
+      screenOptions={{
+        headerShown: false
+      }}
+    >
+      <WorkoutStack.Screen name="BottomNavigationStack" component={BottomNavigationStack} />
+      <WorkoutStack.Screen name="ViewWorkoutNavigator" component={ViewWorkoutNavigator} options={{tabBarVisible: true}}/>
+    </WorkoutStack.Navigator>
+    
   );
 }

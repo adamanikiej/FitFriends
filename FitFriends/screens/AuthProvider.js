@@ -13,7 +13,7 @@ const AuthProvider = ({ children }) => {
     // Load the authentication token from AsyncStorage when the component mounts
     async function fetchToken() {
       try {
-
+        await AsyncStorage.clear()
         const token = await AsyncStorage.getItem('token');
         if (token !== null) {
           setAuthToken(token);
